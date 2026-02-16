@@ -1,4 +1,3 @@
-version: "3.0"
 services:
     zookeeper:
         image: tidacs/nalms-zookeeper
@@ -16,7 +15,7 @@ services:
             - "19092:19092"
         environment:
             BROKER_ID: 0
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,CONNECTIONS_FROM_HOST://localhost:19092
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,CONNECTIONS_FROM_HOST://192.168.0.144:19092
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
             KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONNECTIONS_FROM_HOST://0.0.0.0:19092
             ZOOKEEPER_CONNECT: zookeeper:2181
@@ -38,7 +37,7 @@ services:
             - "19093:19093"
         environment:
             BROKER_ID: 1
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:19093
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://192.168.0.144:19093
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
             KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://0.0.0.0:19093
             ZOOKEEPER_CONNECT: zookeeper:2181
@@ -60,7 +59,7 @@ services:
             - "19094:19094"
         environment:
             BROKER_ID: 2
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092,CONNECTIONS_FROM_HOST://localhost:19094
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092,CONNECTIONS_FROM_HOST://192.168.0.144:19094
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
             KAFKA_LISTENERS: PLAINTEXT://kafka2:9092,CONNECTIONS_FROM_HOST://0.0.0.0:19094
             ZOOKEEPER_CONNECT: zookeeper:2181
@@ -76,9 +75,10 @@ services:
                     memory: 8G
     phoebus-alarm-server:
         image: tidacs/nalms-phoebus-alarm-server:v1.1
-        links:
-            - kafka
-            - example-ioc
+        # links:
+        #     - kafka
+            # - example-ioc
+        network_mode: "host"
         depends_on: 
             - kafka
         volumes:
@@ -86,9 +86,11 @@ services:
             - "./examples/heart_of_gold/config/alarm_server.properties:/opt/nalms/config/alarm_server.properties"
         command: start-server TDT1 /tmp/nalms/alarm_server_TDT1.xml
         environment:
-            KAFKA_BOOTSTRAP: kafka:9092
+            KAFKA_BOOTSTRAP: localhost:19092
+            EPICS_CA_AUTO_ADDR_LIST: "NO"
+            # KAFKA_BOOTSTRAP: kafka:9092
             # EPICS_CA_ADDR_LIST: "example-ioc"
-            EPICS_CA_ADDR_LIST: localhost
+            EPICS_CA_ADDR_LIST: "172.18.255.255"
             ALARM_IOC: "false"
             EPICS_CA_SERVER_PORT: 5064
             EPICS_CA_REPEATER_PORT: 5065
@@ -139,16 +141,16 @@ services:
             - "./libi_config/alarm_server_TDT1.xml:/tmp/nalms/alarm_server_TDT1.xml"
             - "./examples/heart_of_gold/config/alarm_logger.properties:/opt/nalms/config/alarm_logger.properties"
         command: start-logger TDT1 /tmp/nalms/alarm_server_TDT1.xml
-    example-ioc:
-        image: tidacs/nalms-example-ioc:v1.1
-        ports:
-            - "5075:5065/tcp"
-            - "5074:5064/tcp"
-            - "5075:5065/udp"
-            - "5074:5064/udp"
-        environment:
-            EPICS_CA_SERVER_PORT: 5064
-            EPICS_CA_REPEATER_PORT: 5065
+    # example-ioc:
+    #     image: tidacs/nalms-example-ioc:v1.1
+    #     ports:
+    #         - "5075:5065/tcp"
+    #         - "5074:5064/tcp"
+    #         - "5075:5065/udp"
+    #         - "5074:5064/udp"
+    #     environment:
+    #         EPICS_CA_SERVER_PORT: 5064
+    #         EPICS_CA_REPEATER_PORT: 5065
     cruise-control:
         image: tidacs/nalms-cruise-control:v1.1
         ports: 
