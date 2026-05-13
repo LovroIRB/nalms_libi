@@ -1,0 +1,17 @@
+This repo is a slight modification to the SLAC lab's nalms system.
+
+It's functioning is tested with docker desktop and I am not sure why is it neccesarry in my case.
+Please check what are the minimum requirements to run this because without docker desktop turned
+on this fails to connect to dockerhub to download the images.
+
+LIBI user should check libi_config folder. Here are files that are altered from original nalms
+repository. Also check how they are called in docker-compose.  Alarm server xml can be made with
+a script in alarm_server_configuration repo following the README there.
+
+Research what what kafka is and how does it work.
+
+Next steps include:
+- configure the service to auto start on server restart
+- make a full alarm configuration required for LIBI
+- make a grafana dashboard in a way that will be useful for operators and scientists who develop
+the system
